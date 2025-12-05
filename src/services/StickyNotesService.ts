@@ -113,17 +113,6 @@ export class StickyNotesService {
       };
     }
 
-    if (note.userId !== context.userId) {
-      return {
-        type: 'error',
-        recipients: [context.socketId],
-        payload: {
-          code: 'ACCESS_DENIED',
-          message: 'You can only edit your own notes',
-        },
-      };
-    }
-
     const updatedNote = await this.notesRepository.update(payload.noteId, {
       title: payload.title,
       content: payload.content,
@@ -156,17 +145,6 @@ export class StickyNotesService {
         type: 'error',
         recipients: [context.socketId],
         payload: { code: 'NOTE_NOT_FOUND', message: 'Note not found' },
-      };
-    }
-
-    if (note.userId !== context.userId) {
-      return {
-        type: 'error',
-        recipients: [context.socketId],
-        payload: {
-          code: 'ACCESS_DENIED',
-          message: 'You can only delete your own notes',
-        },
       };
     }
 
