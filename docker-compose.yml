@@ -18,21 +18,28 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+    networks:
+      - kraftek-network
 
-  redis:
-    image: redis:7-alpine
-    container_name: kraftek-redis
+  sticky-notes-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: kraftek-sticky-notes
     restart: unless-stopped
     ports:
-      - "6379:6379"
-    volumes:
-      - redis_data:/data
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
+      - "3000:3000"
+    env_file:
+      - .env
+    depends_on:
+      - postgres
+    networks:
+      - kraftek-network
 
 volumes:
   postgres_data:
-  redis_data:
+
+networks:
+  kraftek-network:
+    name: kraftek-socket-gateway_kraftek-network
+    external: true

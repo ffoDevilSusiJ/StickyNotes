@@ -3,6 +3,15 @@ export async function up({ context: queryInterface }) {
     CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
   `);
 
+  const [tables] = await queryInterface.sequelize.query(`
+    SELECT tablename FROM pg_tables WHERE tablename = 'notes';
+  `);
+
+  if (tables.length > 0) {
+    console.log('Table notes already exists, skipping creation');
+    return;
+  }
+
   await queryInterface.createTable('notes', {
     id: {
       type: 'UUID',
@@ -52,21 +61,21 @@ export async function up({ context: queryInterface }) {
     },
   });
 
-  await queryInterface.addIndex('notes', ['room_id'], {
-    name: 'idx_notes_room_id',
-  });
+  await queryInterface.sequelize.query(`
+    CREATE INDEX IF NOT EXISTS idx_notes_room_id ON notes(room_id);
+  `);
 
-  await queryInterface.addIndex('notes', ['user_id'], {
-    name: 'idx_notes_user_id',
-  });
+  await queryInterface.sequelize.query(`
+    CREATE INDEX IF NOT EXISTS idx_notes_user_id ON notes(user_id);
+  `);
 
-  await queryInterface.addIndex('notes', ['room_id', 'user_id'], {
-    name: 'idx_notes_room_user',
-  });
+  await queryInterface.sequelize.query(`
+    CREATE INDEX IF NOT EXISTS idx_notes_room_user ON notes(room_id, user_id);
+  `);
 
-  await queryInterface.addIndex('notes', ['created_at'], {
-    name: 'idx_notes_created_at',
-  });
+  await queryInterface.sequelize.query(`
+    CREATE INDEX IF NOT EXISTS idx_notes_created_at ON notes(created_at);
+  `);
 
   await queryInterface.sequelize.query(`
     CREATE OR REPLACE FUNCTION update_notes_updated_at()
